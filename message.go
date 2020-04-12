@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 // COAPType represents the message type.

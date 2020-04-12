@@ -6,7 +6,7 @@ import (
 	"io"
 	"sort"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 // DgramMessage implements Message interface.

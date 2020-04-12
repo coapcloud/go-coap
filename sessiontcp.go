@@ -8,8 +8,8 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/go-ocf/go-coap/codes"
-	coapNet "github.com/go-ocf/go-coap/net"
+	"github.com/coapcloud/go-coap/codes"
+	coapNet "github.com/coapcloud/go-coap/net"
 )
 
 type sessionTCP struct {

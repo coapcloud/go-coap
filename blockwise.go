@@ -7,7 +7,7 @@ import (
 	"log"
 	"sync/atomic"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"log"
 	"sync"
 
-	coap "github.com/go-ocf/go-coap"
-	"github.com/go-ocf/go-coap/codes"
+	coap "github.com/coapcloud/go-coap"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 var responseClientConn = make(map[string]*coap.ClientConn, 0)

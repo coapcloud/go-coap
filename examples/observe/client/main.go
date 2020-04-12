@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	coap "github.com/go-ocf/go-coap"
+	coap "github.com/coapcloud/go-coap"
 )
 
 func observe(w coap.ResponseWriter, req *coap.Request) {

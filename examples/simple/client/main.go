@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	coap "github.com/go-ocf/go-coap"
+	coap "github.com/coapcloud/go-coap"
 )
 
 func main() {

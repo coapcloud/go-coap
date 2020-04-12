@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 // assertEqualMessages compares the e(xptected) message to the a(ctual) message

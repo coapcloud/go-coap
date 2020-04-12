@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	coap "github.com/go-ocf/go-coap"
-	"github.com/go-ocf/go-coap/codes"
+	coap "github.com/coapcloud/go-coap"
+	"github.com/coapcloud/go-coap/codes"
 	dtls "github.com/pion/dtls/v2"
 )
 

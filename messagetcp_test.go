@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 func TestTCPDecodeMessageSmallWithPayload(t *testing.T) {

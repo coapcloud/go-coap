@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 // A ClientConn represents a connection to a COAP server.

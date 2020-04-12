@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 func TestNoResponse2XXCodes(t *testing.T) {

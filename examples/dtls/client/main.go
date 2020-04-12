@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	coap "github.com/go-ocf/go-coap"
+	coap "github.com/coapcloud/go-coap"
 	dtls "github.com/pion/dtls/v2"
 )
 

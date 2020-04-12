@@ -1,4 +1,4 @@
-package codes // import "github.com/go-ocf/go-coap/codes"
+package codes // import "github.com/coapcloud/go-coap/codes"
 
 import (
 	"fmt"
@@ -82,10 +82,10 @@ var strToCode = map[string]Code{
 	`"GatewayTimeout"`:                     GatewayTimeout,
 	`"ProxyingNotSupported"`:               ProxyingNotSupported,
 	`"Capabilities and Settings Messages"`: CSM,
-	`"Ping"`:    Ping,
-	`"Pong"`:    Pong,
-	`"Release"`: Release,
-	`"Abort"`:   Abort,
+	`"Ping"`:                               Ping,
+	`"Pong"`:                               Pong,
+	`"Release"`:                            Release,
+	`"Abort"`:                              Abort,
 }
 
 // UnmarshalJSON unmarshals b into the Code.

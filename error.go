@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/go-ocf/go-coap/net"
+	"github.com/coapcloud/go-coap/net"
 )
 
 // Error errors type of coap

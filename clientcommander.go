@@ -9,7 +9,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 // ClientCommander provides commands Get,Post,Put,Delete,Observe

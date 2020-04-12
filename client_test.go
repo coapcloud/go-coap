@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-ocf/go-coap/codes"
+	"github.com/coapcloud/go-coap/codes"
 )
 
 func periodicTransmitter(w ResponseWriter, r *Request) {

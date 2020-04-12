@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	coapNet "github.com/go-ocf/go-coap/net"
+	coapNet "github.com/coapcloud/go-coap/net"
 	dtls "github.com/pion/dtls/v2"
 	"github.com/stretchr/testify/require"
 )
