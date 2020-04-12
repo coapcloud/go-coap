@@ -3,9 +3,11 @@ package coap
 import (
 	"bytes"
 	"context"
+	"crypto/x509"
 	"fmt"
 	"net"
 
+	"github.com/go-ocf/go-coap/codes"
 	coapNet "github.com/go-ocf/go-coap/net"
 )
 
@@ -18,7 +20,7 @@ type connUDP interface {
 }
 
 type sessionUDP struct {
-	sessionBase
+	*sessionBase
 	connection     connUDP
 	sessionUDPData *coapNet.ConnUDPContext // oob data to get egress interface right
 }
@@ -39,13 +41,7 @@ func newSessionUDP(connection connUDP, srv *Server, sessionUDPData *coapNet.Conn
 	}
 
 	s := &sessionUDP{
-		sessionBase: sessionBase{
-			srv:                  srv,
-			handler:              &TokenHandler{tokenHandlers: make(map[[MaxTokenSize]byte]HandlerFunc)},
-			blockWiseTransfer:    BlockWiseTransfer,
-			blockWiseTransferSzx: uint32(BlockWiseTransferSzx),
-			mapPairs:             make(map[[MaxTokenSize]byte]map[uint16](*sessionResp)),
-		},
+		sessionBase:    newBaseSession(BlockWiseTransfer, BlockWiseTransferSzx, srv),
 		connection:     connection,
 		sessionUDPData: sessionUDPData,
 	}
@@ -62,6 +58,11 @@ func (s *sessionUDP) RemoteAddr() net.Addr {
 	return s.sessionUDPData.RemoteAddr()
 }
 
+// PeerCertificates implements the networkSession.PeerCertificates method.
+func (s *sessionUDP) PeerCertificates() []*x509.Certificate {
+	return nil
+}
+
 // BlockWiseTransferEnabled
 func (s *sessionUDP) blockWiseEnabled() bool {
 	return s.blockWiseTransfer
@@ -72,13 +73,15 @@ func (s *sessionUDP) blockWiseIsValid(szx BlockWiseSzx) bool {
 }
 
 func (s *sessionUDP) closeWithError(err error) error {
-	s.srv.sessionUDPMapLock.Lock()
-	delete(s.srv.sessionUDPMap, s.sessionUDPData.Key())
-	s.srv.sessionUDPMapLock.Unlock()
-	c := ClientConn{commander: &ClientCommander{s}}
-	s.srv.NotifySessionEndFunc(&c, err)
+	if s.sessionBase.Close() == nil {
+		s.srv.sessionUDPMapLock.Lock()
+		delete(s.srv.sessionUDPMap, s.sessionUDPData.Key())
+		s.srv.sessionUDPMapLock.Unlock()
+		c := ClientConn{commander: &ClientCommander{s}}
+		s.srv.NotifySessionEndFunc(&c, err)
+	}
 
-	return err
+	return nil
 }
 
 // Ping send ping over udp(unicast) and wait for response.
@@ -90,14 +93,14 @@ func (s *sessionUDP) PingWithContext(ctx context.Context) error {
 	// BUG of iotivity: https://jira.iotivity.org/browse/IOT-3149
 	req := s.NewMessage(MessageParams{
 		Type:      Confirmable,
-		Code:      Empty,
+		Code:      codes.Empty,
 		MessageID: GenerateMessageID(),
 	})
 	resp, err := s.ExchangeWithContext(ctx, req)
 	if err != nil {
 		return err
 	}
-	if resp.Type() == Reset {
+	if resp.Type() == Reset || resp.Type() == Acknowledgement {
 		return nil
 	}
 	return ErrInvalidResponse
@@ -133,8 +136,8 @@ func (s *sessionUDP) WriteMsgWithContext(ctx context.Context, req Message) error
 
 func (s *sessionUDP) sendPong(w ResponseWriter, r *Request) error {
 	resp := r.Client.NewMessage(MessageParams{
-		Type:      Reset,
-		Code:      Empty,
+		Type:      Acknowledgement,
+		Code:      codes.Empty,
 		MessageID: r.Msg.MessageID(),
 	})
 	return w.WriteMsgWithContext(r.Ctx, resp)
@@ -143,7 +146,7 @@ func (s *sessionUDP) sendPong(w ResponseWriter, r *Request) error {
 func (s *sessionUDP) handleSignals(w ResponseWriter, r *Request) bool {
 	switch r.Msg.Code() {
 	// handle of udp ping
-	case Empty:
+	case codes.Empty:
 		if r.Msg.Type() == Confirmable && r.Msg.AllOptions().Len() == 0 && (r.Msg.Payload() == nil || len(r.Msg.Payload()) == 0) {
 			s.sendPong(w, r)
 			return true

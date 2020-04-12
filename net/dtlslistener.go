@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/pion/dtls"
+	dtls "github.com/pion/dtls/v2"
 )
 
 type connData struct {
@@ -18,12 +18,13 @@ type connData struct {
 
 // DTLSListener is a DTLS listener that provides accept with context.
 type DTLSListener struct {
-	listener  *dtls.Listener
+	listener  net.Listener
 	heartBeat time.Duration
 	wg        sync.WaitGroup
 	doneCh    chan struct{}
 	connCh    chan connData
 
+	closed   uint32
 	deadline atomic.Value
 }
 
@@ -69,12 +70,12 @@ func NewDTLSListener(network string, addr string, cfg *dtls.Config, heartBeat ti
 // AcceptWithContext waits with context for a generic Conn.
 func (l *DTLSListener) AcceptWithContext(ctx context.Context) (net.Conn, error) {
 	for {
+		if atomic.LoadUint32(&l.closed) == 1 {
+			return nil, ErrServerClosed
+		}
 		select {
 		case <-ctx.Done():
-			if ctx.Err() != nil {
-				return nil, fmt.Errorf("cannot accept connections: %v", ctx.Err())
-			}
-			return nil, nil
+			return nil, ctx.Err()
 		default:
 		}
 		err := l.SetDeadline(time.Now().Add(l.heartBeat))
@@ -109,13 +110,19 @@ func (l *DTLSListener) Accept() (net.Conn, error) {
 	if deadline.IsZero() {
 		select {
 		case d := <-l.connCh:
-			return NewConnDTLS(d.conn), d.err
+			if d.err != nil {
+				return nil, d.err
+			}
+			return d.conn, nil
 		}
 	}
 
 	select {
 	case d := <-l.connCh:
-		return NewConnDTLS(d.conn), d.err
+		if d.err != nil {
+			return nil, d.err
+		}
+		return d.conn, nil
 	case <-time.After(deadline.Sub(time.Now())):
 		return nil, fmt.Errorf(ioTimeout)
 	}
@@ -123,6 +130,9 @@ func (l *DTLSListener) Accept() (net.Conn, error) {
 
 // Close closes the connection.
 func (l *DTLSListener) Close() error {
+	if !atomic.CompareAndSwapUint32(&l.closed, 0, 1) {
+		return nil
+	}
 	err := l.listener.Close()
 	close(l.doneCh)
 	l.wg.Wait()
